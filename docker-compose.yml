@@ -16,6 +16,7 @@ services:
     image: nats
     ports:
       - "4222:4222"
+      - "8222:8222"
       
   client-gateway:
     image: client-gateway
@@ -58,6 +59,24 @@ services:
     command: npm run start:dev
     environment:
       - PORT=3002
-      # - PORT_DB=5433
       - NATS_SERVERS=nats://nats-server:4222
       - DATABASE_URL=postgresql://postgres:postgres@orders-db:5432/orders?schema=public
+
+  payments-ms:
+    image: payments-ms
+    build:
+      context: ./payments-ms
+      dockerfile: Dockerfile
+    volumes:
+      - ./payments-ms/src:/usr/src/app/src
+    ports:
+      - '${PAYMENT_MS_PORT}:${PAYMENT_MS_PORT}'
+    command: npm run start:dev
+    environment:
+    - PAYMENT_MS_PORT=${PAYMENT_MS_PORT}
+    - NATS_SERVERS=nats://nats-server:4222
+    - DATABASE_URL=file:./dev.db
+    - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+    - STRIPE_ENDPOINT_SECRET=${STRIPE_ENDPOINT_SECRET}
+    - STRIPE_SUCCESS_URL=${STRIPE_SUCCESS_URL}
+    - STRIPE_CANCEL_URL=${STRIPE_CANCEL_URL}
