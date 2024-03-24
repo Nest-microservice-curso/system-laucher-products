@@ -93,3 +93,4 @@ services:
       - nats-server
     environment:
       - NATS_SERVERS=nats://nats-server:4222
+      - DATABASE_URL=${DATABASE_URL}
